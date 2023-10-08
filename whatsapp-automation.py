@@ -1,41 +1,43 @@
+from random import *
+import pyautogui
 from selenium import webdriver
 import time
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromiumService
 from webdriver_manager.core.os_manager import ChromeType
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import pandas as pd
+import urllib
 
-# url whatsapp >> wa.me/Contact
-# Iniciar conversa no whatsapp >> _advp _aeam
-# escrever a mensagem no whatsapp >> selectable-text copyable-text iq0m558w g0rxnol2
 
+# Capturando as informações da planilha através do import do pandas.
+contatos = pd.read_excel('contatos.xlsx', engine='openpyxl')
+
+# Chama o brownser
 driver = webdriver.Chrome()
 driver.get('http://web.whatsapp.com/')
 time.sleep(30)
 
-contatos = ['Bel', 'Bel']
-mensagem = 'Teste'
 
-def buscar_contatos(contatos):
-    campo_pesquisa = driver.find_element('//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p')
+while len(driver.find_elements(By.ID, 'pane-side')) <1:
     time.sleep(3)
-    campo_pesquisa.click
-    campo_pesquisa.send_keys(contatos)
-    campo_pesquisa.send_keys(Keys.ENTER)
 
-def enviar_mensagem(mensagem):
-    campo_mensagem = driver.find_elements('//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div[2]/div[1]/p')
-    time.sleep(3)
-    campo_mensagem.click
-    campo_mensagem.send_keys(mensagem)
-    campo_mensagem.send_keys(Keys.ENTER)
 
-for contato in contatos:
-    buscar_contatos(contatos)
-    time.sleep(10)
-    enviar_mensagem(mensagem)
+for i, mensagem in enumerate(contatos['Mensagem']):
+    pessoa = contatos.loc[i, 'Nome']
+    number = contatos.loc[i, 'Contatos']
+    text = urllib.parse.quote(f"Olá {pessoa}! {mensagem}")
+    link = f"http://web.whatsapp.com/send?phone={number}&text={text}"
+    driver.get(link)
+    while len(driver.find_elements(By.ID, 'pane-side')) <1:
+        time.sleep(3)
+    time.sleep(15)
+    # eviar = driver.find_element(By.XPATH,'//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span')
+    driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div[2]/div[1]/p')
+    pyautogui.keyDown('enter')
+    pyautogui.keyUp('enter')
+    time.sleep(randrange(15, 60))
 
-# contact = 5581985691269
-# time.sleep
 
 
